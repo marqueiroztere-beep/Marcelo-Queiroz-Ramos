@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard SEFAZ MA</title>
+<style>
+:root {
+  --bg:#eef1f4;
+  --card:#fff;
+  --sidebar:#0d5f3a;
+  --sidebar-2:#0a4f30;
+  --green:#138a52;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#d8dee6;
+  --shadow:0 6px 18px rgba(0,0,0,.06);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+.app{display:grid;grid-template-columns:272px 1fr;min-height:100vh}
+.sidebar{background:linear-gradient(180deg,var(--sidebar),var(--sidebar-2));color:#fff;padding:20px 18px;position:sticky;top:0;height:100vh}
+.brand{font-size:18px;font-weight:800;letter-spacing:.06em;margin:2px 4px 24px}
+.menu-title{font-size:11px;opacity:.7;margin:0 8px 10px;letter-spacing:.14em}
+.menu button{width:100%;border:0;background:transparent;color:#fff;padding:14px 12px;text-align:left;border-radius:12px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.2}
+.menu button.active,.menu button:hover{background:rgba(255,255,255,.12)}
+.main{padding:20px 22px 24px}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.title h1{margin:0;font-size:26px;letter-spacing:.02em}
+.title p{margin:7px 0 0;color:var(--muted);font-size:13px}
+.badge{background:#fff;border:1px solid var(--border);border-radius:999px;padding:8px 12px;font-size:12px;box-shadow:var(--shadow)}
+.filters{display:grid;grid-template-columns:1.1fr 1fr .7fr 1.2fr;gap:12px;margin-bottom:14px}
+.filter{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+.filter label{display:block;color:var(--muted);font-size:11px;font-weight:700;margin-bottom:7px;letter-spacing:.06em}
+.filter select,.filter input{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 11px;font-size:14px;background:#fff}
+.cards{display:grid;grid-template-columns:1.15fr 1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);min-height:112px}
+.card.primary{background:linear-gradient(135deg,#0f7f4c,#19a45e);color:#fff;border:none}
+.card h3{margin:0 0 16px;font-size:13px;letter-spacing:.04em}
+.kpi{font-size:34px;font-weight:800;line-height:1}
+.kpi.smallmoney{font-size:26px}
+.sub{margin-top:10px;font-size:12px;color:var(--muted)}
+.card.primary .sub{color:rgba(255,255,255,.88)}
+.grid{display:grid;grid-template-columns:1.2fr .95fr;gap:14px;margin-bottom:14px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 8px}
+.panel-head h2{margin:0;font-size:17px}
+.panel-body{padding:10px 18px 18px}
+.chart{display:flex;flex-direction:column;gap:12px}
+.bar-row{display:grid;grid-template-columns:minmax(180px,34%) 1fr 64px;align-items:center;gap:10px}
+.bar-label{font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{height:16px;background:#edf1f4;border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#138a52,#59c784);border-radius:999px}
+.bar-value{font-size:12px;color:var(--muted);text-align:right}
+.side-grid{display:grid;gap:12px}
+.mini{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fbfcfd}
+.mini .label{font-size:11px;color:var(--muted);letter-spacing:.08em;margin-bottom:8px}
+.mini .value{font-size:26px;font-weight:800;line-height:1.1}
+.mini .value.text{font-size:18px}
+.table-panel{overflow:hidden}
+.table-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--border)}
+.table-head h2{margin:0;font-size:17px}
+.table-wrap{max-height:430px;overflow:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid #eef1f4;text-align:left;font-size:12px;vertical-align:top}
+th{position:sticky;top:0;background:#f8fafc;z-index:2;font-size:11px;letter-spacing:.06em}
+.status-pill{display:inline-block;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;background:#edf2f7;color:#1f2937}
+.money{font-weight:700;white-space:nowrap}
+.muted{color:var(--muted)}
+.empty{padding:28px;color:var(--muted);text-align:center}
+.footer{margin-top:10px;color:var(--muted);font-size:12px}
+@media (max-width:1200px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media (max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.filters{grid-template-columns:1fr 1fr}}
+@media (max-width:650px){.filters,.cards{grid-template-columns:1fr}.topbar{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">DASHBOARD</div>
+    <div class="menu-title">MENU</div>
+    <nav class="menu">
+      <button data-view="PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO">PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO</button>
+      <button data-view="HOMOLOGAÇÕES EM ANDAMENTO">HOMOLOGAÇÕES EM ANDAMENTO</button>
+      <button data-view="CRÉDITOS HOMOLOGADOS">CRÉDITOS HOMOLOGADOS</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title">
+        <h1 id="pageTitle">PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO</h1>
+        <p>Painel standalone com os dados reais atualizados das três bases.</p>
+      </div>
+      <div class="badge" id="baseBadge">0 registros carregados</div>
+    </div>
+
+    <section class="filters">
+      <div class="filter">
+        <label>EMPRESA</label>
+        <select id="empresaFilter"><option value="">Todas</option></select>
+      </div>
+      <div class="filter">
+        <label>STATUS</label>
+        <select id="statusFilter"><option value="">Todos</option></select>
+      </div>
+      <div class="filter">
+        <label>ANO</label>
+        <select id="anoFilter"><option value="">Todos</option></select>
+      </div>
+      <div class="filter">
+        <label>PESQUISA</label>
+        <input id="searchFilter" type="text" placeholder="Empresa, CNPJ, processo...">
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="card primary">
+        <h3 id="card1Title">TOTAL REGISTROS</h3>
+        <div class="kpi" id="kpi1">0</div>
+        <div class="sub" id="card1Sub">Base ativa</div>
+      </div>
+      <div class="card">
+        <h3 id="card2Title">STATUS DIFERENTES</h3>
+        <div class="kpi" id="kpi2">0</div>
+        <div class="sub" id="card2Sub">Quantidade de situações distintas</div>
+      </div>
+      <div class="card">
+        <h3 id="card3Title">EMPRESAS</h3>
+        <div class="kpi" id="kpi3">0</div>
+        <div class="sub" id="card3Sub">Empresas únicas</div>
+      </div>
+      <div class="card">
+        <h3 id="card4Title">VALOR TOTAL</h3>
+        <div class="kpi smallmoney" id="kpi4">R$ 0,00</div>
+        <div class="sub" id="card4Sub">Somatório do recorte filtrado</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <div class="panel-head">
+          <h2 id="chartTitle">DISTRIBUIÇÃO POR STATUS</h2>
+          <div class="muted" id="chartMeta">Top 8 categorias</div>
+        </div>
+        <div class="panel-body">
+          <div class="chart" id="barChart"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>VISÃO RÁPIDA</h2>
+        </div>
+        <div class="panel-body">
+          <div class="side-grid">
+            <div class="mini">
+              <div class="label" id="quick1Label">STATUS MAIS FREQUENTE</div>
+              <div class="value text" id="quick1">-</div>
+            </div>
+            <div class="mini">
+              <div class="label" id="quick2Label">TOP EMPRESA</div>
+              <div class="value text" id="quick2">-</div>
+            </div>
+            <div class="mini">
+              <div class="label" id="quick3Label">ANO MAIS RECORRENTE</div>
+              <div class="value" id="quick3">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="table-head">
+        <h2>TABELA DE DETALHAMENTO</h2>
+        <div class="badge" id="tableCount">0 linhas</div>
+      </div>
+      <div class="table-wrap" id="tableWrap"></div>
+    </section>
+
+    <div class="footer">Arquivo HTML único. Basta substituir este arquivo no GitHub para atualizar o site.</div>
+  </main>
+</div>
+
+<script>
+const DATASETS = {"PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO": [{"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "TROPICAL SÃO LUIS LTDA", "status": "Distribuição de Processo", "processo": "462549002416", "cnpj": "30224023000140", "ie": "125601620", "data": "14/07/2025", "ano": "2025", "valor_solicitado": 1359222.63, "valor_solicitado_fmt": "R$ 1.359.222,63", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "RIO TINTO DO BRASIL LTDA", "status": "Distribuição de Processo", "processo": "4182549000226", "cnpj": "06959319000125", "ie": "121242781", "data": "07/11/2025", "ano": "2025", "valor_solicitado": 29821300.04, "valor_solicitado_fmt": "R$ 29.821.300,04", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "FERROVIA NORTE SUL S A", "status": "Distribuição de Processo", "processo": "542649000023", "cnpj": "09257877000137", "ie": "122426282", "data": "22/01/2026", "ano": "2026", "valor_solicitado": 12489872.85, "valor_solicitado_fmt": "R$ 12.489.872,85", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Distribuição de Processo", "processo": "4182649000019", "cnpj": "07634590000820", "ie": "123122090", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Distribuição de Processo", "processo": "4182649000020", "cnpj": "07634590000749", "ie": "123122104", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 914722.27, "valor_solicitado_fmt": "R$ 914.722,27", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Distribuição de Processo", "processo": "4182649000021", "cnpj": "07634590002288", "ie": "127201459", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 328555.54, "valor_solicitado_fmt": "R$ 328.555,54", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Distribuição de Processo", "processo": "4182649000022", "cnpj": "07634590001397", "ie": "123745241", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SOUTH32 MINERALS SA", "status": "Distribuição de Processo", "processo": "4182649000023", "cnpj": "42105890000901", "ie": "120844931", "data": "28/01/2026", "ano": "2026", "valor_solicitado": 154129244.33, "valor_solicitado_fmt": "R$ 154.129.244,33", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SLC AGRICOLA S.A.", "status": "Lider Analisa", "processo": "512049000167", "cnpj": "89096457001631", "ie": "121596168", "data": "27/11/2020", "ano": "2020", "valor_solicitado": 5672997.82, "valor_solicitado_fmt": "R$ 5.672.997,82", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SLC AGRICOLA S.A.", "status": "Lider Analisa", "processo": "512149000322", "cnpj": "89096457001631", "ie": "121596168", "data": "13/07/2021", "ano": "2021", "valor_solicitado": 2655176.94, "valor_solicitado_fmt": "R$ 2.655.176,94", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Lider Analisa", "processo": "4182349000026", "cnpj": "07634590000749", "ie": "123122104", "data": "17/02/2023", "ano": "2023", "valor_solicitado": 1520955.15, "valor_solicitado_fmt": "R$ 1.520.955,15", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SLC AGRICOLA S.A.", "status": "Lider Analisa", "processo": "4182349000094", "cnpj": "89096457004304", "ie": "124685854", "data": "24/06/2023", "ano": "2023", "valor_solicitado": 13731631.82, "valor_solicitado_fmt": "R$ 13.731.631,82", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "MINERACAO AURIZONA S A", "status": "Lider Analisa", "processo": "4182449000081", "cnpj": "42422048000219", "ie": "122399870", "data": "13/06/2024", "ano": "2024", "valor_solicitado": 32896465.72, "valor_solicitado_fmt": "R$ 32.896.465,72", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SLC AGRICOLA S.A.", "status": "Lider Analisa", "processo": "4182449000108", "cnpj": "89096457004304", "ie": "124685854", "data": "19/07/2024", "ano": "2024", "valor_solicitado": 6404639.53, "valor_solicitado_fmt": "R$ 6.404.639,53", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Lider Analisa", "processo": "4182449000130", "cnpj": "07634590000820", "ie": "123122090", "data": "11/08/2024", "ano": "2024", "valor_solicitado": 175489.05, "valor_solicitado_fmt": "R$ 175.489,05", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "UPPER DOG COMERCIAL LTDA ME", "status": "Lider Analisa", "processo": "47244900160816", "cnpj": "22468303000176", "ie": "124652794", "data": "16/09/2024", "ano": "2024", "valor_solicitado": 7130166.88, "valor_solicitado_fmt": "R$ 7.130.166,88", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SONI JAIME WERNER", "status": "Gestor Analisa", "processo": "492449000564", "cnpj": "00001814092919", "ie": "125062249", "data": "24/04/2024", "ano": "2024", "valor_solicitado": 1277734.17, "valor_solicitado_fmt": "R$ 1.277.734,17", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SUZANO S.A.", "status": "Gestor Analisa", "processo": "4182449000065", "cnpj": "16404287022205", "ie": "123519071", "data": "26/04/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "MINERACAO AURIZONA S A", "status": "Gestor Analisa", "processo": "4182449000069", "cnpj": "42422048000219", "ie": "122399870", "data": "09/05/2024", "ano": "2024", "valor_solicitado": 16189605.56, "valor_solicitado_fmt": "R$ 16.189.605,56", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "VIENA SIDERURGICA S/A", "status": "Gestor Analisa", "processo": "4182449000118", "cnpj": "07609993000142", "ie": "120924820", "data": "26/07/2024", "ano": "2024", "valor_solicitado": 2073042.41, "valor_solicitado_fmt": "R$ 2.073.042,41", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Gestor Analisa", "processo": "4182449000129", "cnpj": "07634590000749", "ie": "123122104", "data": "11/08/2024", "ano": "2024", "valor_solicitado": 2118207.79, "valor_solicitado_fmt": "R$ 2.118.207,79", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "VIENA SIDERURGICA S/A", "status": "Gestor Analisa", "processo": "4182549000157", "cnpj": "07609993000142", "ie": "120924820", "data": "08/07/2025", "ano": "2025", "valor_solicitado": 5948659.27, "valor_solicitado_fmt": "R$ 5.948.659,27", "valor_homologado": 0.0, "valor_homologado_fmt": ""}, {"base": "PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO", "empresa": "FERROVIA NORTE SUL S A", "status": "Análise de Processo", "processo": "542549000475", "cnpj": "09257877000137", "ie": "122426282", "data": "28/10/2025", "ano": "2025", "valor_solicitado": 54784313.72, "valor_solicitado_fmt": "R$ 54.784.313,72", "valor_homologado": 0.0, "valor_homologado_fmt": ""}], "HOMOLOGAÇÕES EM ANDAMENTO": [{"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512049000167", "cnpj": "89096457001631", "ie": "121596168", "data": "27/11/2020", "ano": "2020", "valor_solicitado": 5672997.82, "valor_solicitado_fmt": "R$ 5.672.997,82", "valor_homologado": 1826014.61, "valor_homologado_fmt": "R$ 1.826.014,61"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SOUTH32 MINERALS SA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "542149000204", "cnpj": "42105890000901", "ie": "120844931", "data": "30/04/2021", "ano": "2021", "valor_solicitado": 352680666.56, "valor_solicitado_fmt": "R$ 352.680.666,56", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512149000322", "cnpj": "89096457001631", "ie": "121596168", "data": "13/07/2021", "ano": "2021", "valor_solicitado": 2655176.94, "valor_solicitado_fmt": "R$ 2.655.176,94", "valor_homologado": 2323604.64, "valor_homologado_fmt": "R$ 2.323.604,64"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "RIO TINTO DO BRASIL LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "542149000553", "cnpj": "06959319000125", "ie": "121242781", "data": "09/12/2021", "ano": "2021", "valor_solicitado": 81660261.79, "valor_solicitado_fmt": "R$ 81.660.261,79", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512149000330", "cnpj": "89096457004304", "ie": "124685854", "data": "31/07/2021", "ano": "2021", "valor_solicitado": 3137858.32, "valor_solicitado_fmt": "R$ 3.137.858,32", "valor_homologado": 2685353.41, "valor_homologado_fmt": "R$ 2.685.353,41"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512149000331", "cnpj": "89096457001631", "ie": "121596168", "data": "31/07/2021", "ano": "2021", "valor_solicitado": 7503008.68, "valor_solicitado_fmt": "R$ 7.503.008,68", "valor_homologado": 2470188.68, "valor_homologado_fmt": "R$ 2.470.188,68"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182249000028", "cnpj": "89096457004304", "ie": "124685854", "data": "28/07/2022", "ano": "2022", "valor_solicitado": 6711885.34, "valor_solicitado_fmt": "R$ 6.711.885,34", "valor_homologado": 5174486.73, "valor_homologado_fmt": "R$ 5.174.486,73"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182249000027", "cnpj": "89096457001631", "ie": "121596168", "data": "28/07/2022", "ano": "2022", "valor_solicitado": 3397953.88, "valor_solicitado_fmt": "R$ 3.397.953,88", "valor_homologado": 626660.23, "valor_homologado_fmt": "R$ 626.660,23"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "RIO TINTO DO BRASIL LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182249000038", "cnpj": "06959319000125", "ie": "121242781", "data": "09/09/2022", "ano": "2022", "valor_solicitado": 17889477.52, "valor_solicitado_fmt": "R$ 17.889.477,52", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182249000073", "cnpj": "07634590001397", "ie": "123745241", "data": "21/12/2022", "ano": "2022", "valor_solicitado": 292095.25, "valor_solicitado_fmt": "R$ 292.095,25", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SUZANO S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182349000032", "cnpj": "16404287022205", "ie": "123519071", "data": "23/02/2023", "ano": "2023", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 5134265.44, "valor_homologado_fmt": "R$ 5.134.265,44"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182349000026", "cnpj": "07634590000749", "ie": "123122104", "data": "17/02/2023", "ano": "2023", "valor_solicitado": 1520955.15, "valor_solicitado_fmt": "R$ 1.520.955,15", "valor_homologado": 1845743.76, "valor_homologado_fmt": "R$ 1.845.743,76"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182349000027", "cnpj": "07634590001397", "ie": "123745241", "data": "17/02/2023", "ano": "2023", "valor_solicitado": 54288.5, "valor_solicitado_fmt": "R$ 54.288,50", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182349000035", "cnpj": "07634590000820", "ie": "123122090", "data": "24/02/2023", "ano": "2023", "valor_solicitado": 1739866.34, "valor_solicitado_fmt": "R$ 1.739.866,34", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "UPD PET CHEWS LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "472349000130", "cnpj": "37827738000137", "ie": "126529515", "data": "13/02/2023", "ano": "2023", "valor_solicitado": 356345.44, "valor_solicitado_fmt": "R$ 356.345,44", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SUZANO S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182349000088", "cnpj": "16404287022205", "ie": "123519071", "data": "01/06/2023", "ano": "2023", "valor_solicitado": 16710389.63, "valor_solicitado_fmt": "R$ 16.710.389,63", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182349000093", "cnpj": "89096457001631", "ie": "121596168", "data": "24/06/2023", "ano": "2023", "valor_solicitado": 8923600.03, "valor_solicitado_fmt": "R$ 8.923.600,03", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182349000094", "cnpj": "89096457004304", "ie": "124685854", "data": "24/06/2023", "ano": "2023", "valor_solicitado": 13731631.82, "valor_solicitado_fmt": "R$ 13.731.631,82", "valor_homologado": 8679732.79, "valor_homologado_fmt": "R$ 8.679.732,79"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SUZANO S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000065", "cnpj": "16404287022205", "ie": "123519071", "data": "26/04/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 2212928.95, "valor_homologado_fmt": "R$ 2.212.928,95"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "GAPS AGRONEGOCIOS LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512449000155", "cnpj": "29907174000467", "ie": "127355480", "data": "22/02/2024", "ano": "2024", "valor_solicitado": 1451045.58, "valor_solicitado_fmt": "R$ 1.451.045,58", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "GUAIBA AGRONEGOCIO LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512449000160", "cnpj": "14545553000304", "ie": "125190174", "data": "22/02/2024", "ano": "2024", "valor_solicitado": 1728585.75, "valor_solicitado_fmt": "R$ 1.728.585,75", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "GUABIJU AGRONEGOCIO LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512449000161", "cnpj": "16843957000210", "ie": "125195753", "data": "22/02/2024", "ano": "2024", "valor_solicitado": 598260.08, "valor_solicitado_fmt": "R$ 598.260,08", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SONI JAIME WERNER", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000564", "cnpj": "00001814092919", "ie": "125062249", "data": "24/04/2024", "ano": "2024", "valor_solicitado": 1277734.17, "valor_solicitado_fmt": "R$ 1.277.734,17", "valor_homologado": 124973.42, "valor_homologado_fmt": "R$ 124.973,42"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "RONI VALDIR WERNER", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000570", "cnpj": "00001812311907", "ie": "125062257", "data": "26/04/2024", "ano": "2024", "valor_solicitado": 837750.47, "valor_solicitado_fmt": "R$ 837.750,47", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "GABRIEL MALDANER WERNER", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000571", "cnpj": "00008674819940", "ie": "126634408", "data": "26/04/2024", "ano": "2024", "valor_solicitado": 106817.39, "valor_solicitado_fmt": "R$ 106.817,39", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "LUCAS WERNER", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000572", "cnpj": "00080032991959", "ie": "127604235", "data": "26/04/2024", "ano": "2024", "valor_solicitado": 11519.82, "valor_solicitado_fmt": "R$ 11.519,82", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "482449000138", "cnpj": "00032754698353", "ie": "127234837", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 6188291.56, "valor_solicitado_fmt": "R$ 6.188.291,56", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "482449000139", "cnpj": "00032754698353", "ie": "127754288", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 3770478.01, "valor_solicitado_fmt": "R$ 3.770.478,01", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000642", "cnpj": "00032754698353", "ie": "123069289", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 10252843.13, "valor_solicitado_fmt": "R$ 10.252.843,13", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000643", "cnpj": "00032754698353", "ie": "127226893", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 7255202.2, "valor_solicitado_fmt": "R$ 7.255.202,20", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "482449000137", "cnpj": "00032754698353", "ie": "127234926", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 8385990.13, "valor_solicitado_fmt": "R$ 8.385.990,13", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "482449000140", "cnpj": "00032754698353", "ie": "127771174", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 2830938.73, "valor_solicitado_fmt": "R$ 2.830.938,73", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000644", "cnpj": "00032754698353", "ie": "127908218", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 1897626.38, "valor_solicitado_fmt": "R$ 1.897.626,38", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "HUGO PRADO FILHO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000645", "cnpj": "00032754698353", "ie": "127714626", "data": "22/05/2024", "ano": "2024", "valor_solicitado": 5818930.28, "valor_solicitado_fmt": "R$ 5.818.930,28", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000108", "cnpj": "89096457004304", "ie": "124685854", "data": "19/07/2024", "ano": "2024", "valor_solicitado": 6404639.53, "valor_solicitado_fmt": "R$ 6.404.639,53", "valor_homologado": 4873938.12, "valor_homologado_fmt": "R$ 4.873.938,12"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "UPPER DOG COMERCIAL LTDA ME", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "472449001608", "cnpj": "22468303000176", "ie": "124652794", "data": "16/09/2024", "ano": "2024", "valor_solicitado": 7130166.88, "valor_solicitado_fmt": "R$ 7.130.166,88", "valor_homologado": 7863397.45, "valor_homologado_fmt": "R$ 7.863.397,45"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "VIENA SIDERURGICA S/A", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000118", "cnpj": "07609993000142", "ie": "120924820", "data": "26/07/2024", "ano": "2024", "valor_solicitado": 2073042.41, "valor_solicitado_fmt": "R$ 2.073.042,41", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000109", "cnpj": "89096457001631", "ie": "121596168", "data": "19/07/2024", "ano": "2024", "valor_solicitado": 6987358.44, "valor_solicitado_fmt": "R$ 6.987.358,44", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "LUIZ ROVANI", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512449000736", "cnpj": "00016262069968", "ie": "123193818", "data": "12/08/2024", "ano": "2024", "valor_solicitado": 374393.12, "valor_solicitado_fmt": "R$ 374.393,12", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "RIO TINTO DO BRASIL LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000087", "cnpj": "06959319000125", "ie": "121242781", "data": "26/06/2024", "ano": "2024", "valor_solicitado": 30060638.93, "valor_solicitado_fmt": "R$ 30.060.638,93", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "MINERACAO AURIZONA S A", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000069", "cnpj": "42422048000219", "ie": "122399870", "data": "09/05/2024", "ano": "2024", "valor_solicitado": 16189605.56, "valor_solicitado_fmt": "R$ 16.189.605,56", "valor_homologado": 1625137.16, "valor_homologado_fmt": "R$ 1.625.137,16"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "LEANDRO COSTA SOARES", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000692", "cnpj": "00091756081115", "ie": "123681391", "data": "07/06/2024", "ano": "2024", "valor_solicitado": 5546752.95, "valor_solicitado_fmt": "R$ 5.546.752,95", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SUZANO S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000044", "cnpj": "16404287022205", "ie": "123519071", "data": "13/03/2024", "ano": "2024", "valor_solicitado": 35054427.56, "valor_solicitado_fmt": "R$ 35.054.427,56", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "MINERACAO AURIZONA S A", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000081", "cnpj": "42422048000219", "ie": "122399870", "data": "13/06/2024", "ano": "2024", "valor_solicitado": 32896465.72, "valor_solicitado_fmt": "R$ 32.896.465,72", "valor_homologado": 13073533.22, "valor_homologado_fmt": "R$ 13.073.533,22"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "ERNI JOSE WERNER", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "492449000566", "cnpj": "00096881712987", "ie": "127604340", "data": "25/04/2024", "ano": "2024", "valor_solicitado": 11698.05, "valor_solicitado_fmt": "R$ 11.698,05", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "MINERACAO AURIZONA S A", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000115", "cnpj": "42422048000219", "ie": "122399870", "data": "23/07/2024", "ano": "2024", "valor_solicitado": 14860073.7, "valor_solicitado_fmt": "R$ 14.860.073,70", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "LUIZ ROVANI", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512449000735", "cnpj": "00016262069968", "ie": "123193818", "data": "11/08/2024", "ano": "2024", "valor_solicitado": 358312.96, "valor_solicitado_fmt": "R$ 358.312,96", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SUZANO S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000072", "cnpj": "16404287022205", "ie": "123519071", "data": "29/05/2024", "ano": "2024", "valor_solicitado": 26919098.42, "valor_solicitado_fmt": "R$ 26.919.098,42", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000129", "cnpj": "07634590000749", "ie": "123122104", "data": "11/08/2024", "ano": "2024", "valor_solicitado": 2118207.79, "valor_solicitado_fmt": "R$ 2.118.207,79", "valor_homologado": 1940594.47, "valor_homologado_fmt": "R$ 1.940.594,47"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000130", "cnpj": "07634590000820", "ie": "123122090", "data": "11/08/2024", "ano": "2024", "valor_solicitado": 175489.05, "valor_solicitado_fmt": "R$ 175.489,05", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000131", "cnpj": "07634590001397", "ie": "123745241", "data": "11/08/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182449000132", "cnpj": "07634590002288", "ie": "127201459", "data": "11/08/2024", "ano": "2024", "valor_solicitado": 3051699.29, "valor_solicitado_fmt": "R$ 3.051.699,29", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "TROPICAL SÃO LUIS LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "462549002416", "cnpj": "30224023000140", "ie": "125601620", "data": "14/07/2025", "ano": "2025", "valor_solicitado": 1359222.63, "valor_solicitado_fmt": "R$ 1.359.222,63", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SLC AGRICOLA S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182549000186", "cnpj": "89096457004304", "ie": "124685854", "data": "05/08/2025", "ano": "2025", "valor_solicitado": 9114714.69, "valor_solicitado_fmt": "R$ 9.114.714,69", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "VIENA SIDERURGICA S/A", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182549000157", "cnpj": "07609993000142", "ie": "120924820", "data": "08/07/2025", "ano": "2025", "valor_solicitado": 5948659.27, "valor_solicitado_fmt": "R$ 5.948.659,27", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "ZENO ASSIS SPULDARO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512449001003", "cnpj": "00046509313987", "ie": "125923961", "data": "28/10/2024", "ano": "2024", "valor_solicitado": 5786.75, "valor_solicitado_fmt": "R$ 5.786,75", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "ZENO ASSIS SPULDARO", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "512449001004", "cnpj": "00046509313987", "ie": "125923961", "data": "28/10/2024", "ano": "2024", "valor_solicitado": 96349.79, "valor_solicitado_fmt": "R$ 96.349,79", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SUZANO S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182549000007", "cnpj": "16404287022205", "ie": "123519071", "data": "09/01/2025", "ano": "2025", "valor_solicitado": 64344506.71, "valor_solicitado_fmt": "R$ 64.344.506,71", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "UPPER DOG COMERCIAL LTDA ME", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "472549001776", "cnpj": "22468303000176", "ie": "124652794", "data": "23/07/2025", "ano": "2025", "valor_solicitado": 2739502.82, "valor_solicitado_fmt": "R$ 2.739.502,82", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "T DA SILVA ALVES LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "462549000120", "cnpj": "13918606000152", "ie": "123619769", "data": "15/01/2025", "ano": "2025", "valor_solicitado": 240418.89, "valor_solicitado_fmt": "R$ 240.418,89", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "WEISUL AGRICOLA LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182549000075", "cnpj": "05033730000889", "ie": "122126645", "data": "20/03/2025", "ano": "2025", "valor_solicitado": 2788490.36, "valor_solicitado_fmt": "R$ 2.788.490,36", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "UPPER DOG COMERCIAL LTDA ME", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "472549000457", "cnpj": "22468303000176", "ie": "124652794", "data": "20/02/2025", "ano": "2025", "valor_solicitado": 3406611.93, "valor_solicitado_fmt": "R$ 3.406.611,93", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "RIO TINTO DO BRASIL LTDA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182549000226", "cnpj": "06959319000125", "ie": "121242781", "data": "07/11/2025", "ano": "2025", "valor_solicitado": 29821300.04, "valor_solicitado_fmt": "R$ 29.821.300,04", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182649000019", "cnpj": "07634590000820", "ie": "123122090", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182649000022", "cnpj": "07634590001397", "ie": "123745241", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "FERROVIA NORTE SUL S A", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "542649000023", "cnpj": "09257877000137", "ie": "122426282", "data": "22/01/2026", "ano": "2026", "valor_solicitado": 12489872.85, "valor_solicitado_fmt": "R$ 12.489.872,85", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182649000020", "cnpj": "07634590000749", "ie": "123122104", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 914722.27, "valor_solicitado_fmt": "R$ 914.722,27", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182649000021", "cnpj": "07634590002288", "ie": "127201459", "data": "26/01/2026", "ano": "2026", "valor_solicitado": 328555.54, "valor_solicitado_fmt": "R$ 328.555,54", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "SOUTH32 MINERALS SA", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "4182649000023", "cnpj": "42105890000901", "ie": "120844931", "data": "28/01/2026", "ano": "2026", "valor_solicitado": 154129244.33, "valor_solicitado_fmt": "R$ 154.129.244,33", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "FERROVIA NORTE SUL S A", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "542549000475", "cnpj": "09257877000137", "ie": "122426282", "data": "28/10/2025", "ano": "2025", "valor_solicitado": 54784313.72, "valor_solicitado_fmt": "R$ 54.784.313,72", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "VALE S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "542549000476", "cnpj": "33592510043473", "ie": "121731030", "data": "28/10/2025", "ano": "2025", "valor_solicitado": 39503910.69, "valor_solicitado_fmt": "R$ 39.503.910,69", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}, {"base": "HOMOLOGAÇÕES EM ANDAMENTO", "empresa": "VALE S.A.", "status": "Em Andamento", "tipo": "HOMOLOGAÇÃO CRÉDITO", "processo": "542549000477", "cnpj": "33592510043473", "ie": "121731030", "data": "28/10/2025", "ano": "2025", "valor_solicitado": 173733390.98, "valor_solicitado_fmt": "R$ 173.733.390,98", "valor_homologado": 0.0, "valor_homologado_fmt": "R$ 0,00"}], "CRÉDITOS HOMOLOGADOS": [{"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SLC AGRICOLA S.A.", "status": "HOMOLOGADO", "certificado": "2025014", "processo": "512049000157", "cnpj": "89096457004304", "ie": "124685854", "data": "22/12/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 4337547.86, "valor_homologado_fmt": "R$ 4.337.547,86"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPPER DOG COMERCIAL LTDA   ME", "status": "HOMOLOGADO", "certificado": "2025013", "processo": "472449000307", "cnpj": "22468303000176", "ie": "124652794", "data": "10/11/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 4265968.98, "valor_homologado_fmt": "R$ 4.265.968,98"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPPER DOG COMERCIAL LTDA   ME", "status": "HOMOLOGADO", "certificado": "2025012", "processo": "472349001005", "cnpj": "22468303000176", "ie": "124652794", "data": "10/11/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 4328302.41, "valor_homologado_fmt": "R$ 4.328.302,41"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "HOMOLOGADO", "certificado": "2025011", "processo": "4182349000034", "cnpj": "07634590000820", "ie": "123122090", "data": "30/09/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 96115.48, "valor_homologado_fmt": "R$ 96.115,48"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPD PET CHEWS LTDA", "status": "HOMOLOGADO", "certificado": "2025010", "processo": "472249000083", "cnpj": "37827738000137", "ie": "126529515", "data": "12/08/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 923913.57, "valor_homologado_fmt": "R$ 923.913,57"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPD PET CHEWS LTDA", "status": "HOMOLOGADO", "certificado": "2025009", "processo": "472249000083", "cnpj": "37827738000137", "ie": "126529515", "data": "12/08/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 150035.3, "valor_homologado_fmt": "R$ 150.035,30"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPPER DOG COMERCIAL LTDA   ME", "status": "HOMOLOGADO", "certificado": "2025008", "processo": "472349000138", "cnpj": "22468303000176", "ie": "124652794", "data": "12/08/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 5869691.66, "valor_homologado_fmt": "R$ 5.869.691,66"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPPER DOG COMERCIAL LTDA   ME", "status": "HOMOLOGADO", "certificado": "2025007", "processo": "472249000084", "cnpj": "22468303000176", "ie": "124652794", "data": "12/08/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 886654.8, "valor_homologado_fmt": "R$ 886.654,80"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPPER DOG COMERCIAL LTDA   ME", "status": "HOMOLOGADO", "certificado": "2025006", "processo": "472249000084", "cnpj": "22468303000176", "ie": "124652794", "data": "12/08/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 533359.43, "valor_homologado_fmt": "R$ 533.359,43"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "ORIZON MARITIMA SAO LUIS LTDA", "status": "HOMOLOGADO", "certificado": "2025005", "processo": "462449002985", "cnpj": "04239222000112", "ie": "121802469", "data": "09/06/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 51595.38, "valor_homologado_fmt": "R$ 51.595,38"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "ORIZON MARITIMA SAO LUIS LTDA", "status": "HOMOLOGADO", "certificado": "2025004", "processo": "462449002985", "cnpj": "04239222000112", "ie": "121802469", "data": "09/06/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 23515.93, "valor_homologado_fmt": "R$ 23.515,93"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "ORIZON MARITIMA SAO LUIS LTDA", "status": "HOMOLOGADO", "certificado": "2025003", "processo": "462449002985", "cnpj": "04239222000112", "ie": "121802469", "data": "09/06/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 174023.47, "valor_homologado_fmt": "R$ 174.023,47"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "ORIZON MARITIMA SAO LUIS LTDA", "status": "HOMOLOGADO", "certificado": "2025002", "processo": "462449002985", "cnpj": "04239222000112", "ie": "121802469", "data": "09/06/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 87365.96, "valor_homologado_fmt": "R$ 87.365,96"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "ORIZON MARITIMA SAO LUIS LTDA", "status": "HOMOLOGADO", "certificado": "2025001", "processo": "462449002985", "cnpj": "04239222000112", "ie": "121802469", "data": "09/06/2025", "ano": "2025", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 73322.3, "valor_homologado_fmt": "R$ 73.322,30"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SUZANO S.A.", "status": "HOMOLOGADO", "certificado": "2024006", "processo": "4182349000087", "cnpj": "16404287022205", "ie": "123519071", "data": "28/06/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 10782028.29, "valor_homologado_fmt": "R$ 10.782.028,29"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "HOMOLOGADO", "certificado": "2024005", "processo": "4182349000025", "cnpj": "07634590000749", "ie": "123122104", "data": "28/06/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 109908.83, "valor_homologado_fmt": "R$ 109.908,83"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "HOMOLOGADO", "certificado": "2024004", "processo": "4182249000075", "cnpj": "07634590000820", "ie": "123122090", "data": "03/05/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 10240.15, "valor_homologado_fmt": "R$ 10.240,15"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "HOMOLOGADO", "certificado": "2024003", "processo": "4182249000075", "cnpj": "07634590000820", "ie": "123122090", "data": "03/05/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 1120491.3, "valor_homologado_fmt": "R$ 1.120.491,30"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "HOMOLOGADO", "certificado": "2024002", "processo": "4182249000074", "cnpj": "07634590000749", "ie": "123122104", "data": "03/05/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 389250.48, "valor_homologado_fmt": "R$ 389.250,48"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SIERENTZ AGRO BRASIL LTDA.", "status": "HOMOLOGADO", "certificado": "2024001", "processo": "4182249000074", "cnpj": "07634590000749", "ie": "123122104", "data": "03/05/2024", "ano": "2024", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 17262.54, "valor_homologado_fmt": "R$ 17.262,54"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "MINERACAO AURIZONA S A", "status": "HOMOLOGADO", "certificado": "2023004", "processo": "4182349000092", "cnpj": "42422048000219", "ie": "122399870", "data": "28/12/2023", "ano": "2023", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 895371.32, "valor_homologado_fmt": "R$ 895.371,32"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "MINERACAO AURIZONA S A", "status": "HOMOLOGADO", "certificado": "2023003", "processo": "542149000537", "cnpj": "42422048000219", "ie": "122399870", "data": "21/12/2023", "ano": "2023", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 6122459.67, "valor_homologado_fmt": "R$ 6.122.459,67"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "MINERACAO AURIZONA S A", "status": "HOMOLOGADO", "certificado": "2023002", "processo": "542149000536", "cnpj": "42422048000219", "ie": "122399870", "data": "21/12/2023", "ano": "2023", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 5223283.29, "valor_homologado_fmt": "R$ 5.223.283,29"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "SUZANO S.A.", "status": "HOMOLOGADO", "certificado": "2023001", "processo": "472249000230", "cnpj": "16404287022205", "ie": "123519071", "data": "04/12/2023", "ano": "2023", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 1809321.15, "valor_homologado_fmt": "R$ 1.809.321,15"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "GEES S A", "status": "HOMOLOGADO", "certificado": "2022007", "processo": "512249000019", "cnpj": "06855894000269", "ie": "121777928", "data": "20/07/2022", "ano": "2022", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 207815.1, "valor_homologado_fmt": "R$ 207.815,10"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "GEES S A", "status": "HOMOLOGADO", "certificado": "2022006", "processo": "512249000019", "cnpj": "06855894000269", "ie": "121777928", "data": "20/07/2022", "ano": "2022", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 37087.65, "valor_homologado_fmt": "R$ 37.087,65"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "GEES S A", "status": "HOMOLOGADO", "certificado": "2022005", "processo": "512249000019", "cnpj": "06855894000269", "ie": "121777928", "data": "20/07/2022", "ano": "2022", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 272916.47, "valor_homologado_fmt": "R$ 272.916,47"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "GEES S A", "status": "HOMOLOGADO", "certificado": "2022004", "processo": "512249000019", "cnpj": "06855894000269", "ie": "121777928", "data": "20/07/2022", "ano": "2022", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 56341.55, "valor_homologado_fmt": "R$ 56.341,55"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "MACAUBA AGRONEGOCIO LTDA", "status": "HOMOLOGADO", "certificado": "2022003", "processo": "512149000042", "cnpj": "15014043000284", "ie": "123970814", "data": "20/07/2022", "ano": "2022", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 232711.45, "valor_homologado_fmt": "R$ 232.711,45"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "MACAUBA AGRONEGOCIO LTDA", "status": "HOMOLOGADO", "certificado": "2022002", "processo": "512149000042", "cnpj": "15014043000284", "ie": "123970814", "data": "20/07/2022", "ano": "2022", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 55444.43, "valor_homologado_fmt": "R$ 55.444,43"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "MACAUBA AGRONEGOCIO LTDA", "status": "HOMOLOGADO", "certificado": "2022001", "processo": "512149000042", "cnpj": "15014043000284", "ie": "123970814", "data": "20/07/2022", "ano": "2022", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 5936.65, "valor_homologado_fmt": "R$ 5.936,65"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPPER DOG COMERCIAL LTDA   ME", "status": "HOMOLOGADO", "certificado": "2021005", "processo": "472049000869", "cnpj": "22468303000176", "ie": "124652794", "data": "26/10/2021", "ano": "2021", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 1628102.11, "valor_homologado_fmt": "R$ 1.628.102,11"}, {"base": "CRÉDITOS HOMOLOGADOS", "empresa": "UPPER DOG COMERCIAL LTDA   ME", "status": "HOMOLOGADO", "certificado": "2021004", "processo": "472049000869", "cnpj": "22468303000176", "ie": "124652794", "data": "26/10/2021", "ano": "2021", "valor_solicitado": 0.0, "valor_solicitado_fmt": "", "valor_homologado": 2150309.62, "valor_homologado_fmt": "R$ 2.150.309,62"}]};
+let currentView = 'PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO';
+
+const el = {
+  pageTitle: document.getElementById('pageTitle'),
+  baseBadge: document.getElementById('baseBadge'),
+  empresaFilter: document.getElementById('empresaFilter'),
+  statusFilter: document.getElementById('statusFilter'),
+  anoFilter: document.getElementById('anoFilter'),
+  searchFilter: document.getElementById('searchFilter'),
+  card1Title: document.getElementById('card1Title'),
+  card2Title: document.getElementById('card2Title'),
+  card3Title: document.getElementById('card3Title'),
+  card4Title: document.getElementById('card4Title'),
+  card1Sub: document.getElementById('card1Sub'),
+  card2Sub: document.getElementById('card2Sub'),
+  card3Sub: document.getElementById('card3Sub'),
+  card4Sub: document.getElementById('card4Sub'),
+  kpi1: document.getElementById('kpi1'),
+  kpi2: document.getElementById('kpi2'),
+  kpi3: document.getElementById('kpi3'),
+  kpi4: document.getElementById('kpi4'),
+  quick1Label: document.getElementById('quick1Label'),
+  quick2Label: document.getElementById('quick2Label'),
+  quick3Label: document.getElementById('quick3Label'),
+  quick1: document.getElementById('quick1'),
+  quick2: document.getElementById('quick2'),
+  quick3: document.getElementById('quick3'),
+  chartTitle: document.getElementById('chartTitle'),
+  chartMeta: document.getElementById('chartMeta'),
+  barChart: document.getElementById('barChart'),
+  tableWrap: document.getElementById('tableWrap'),
+  tableCount: document.getElementById('tableCount')
+};
+
+function formatNumber(v) {
+  return Number(v || 0).toLocaleString('pt-BR');
+}
+function formatMoney(v) {
+  return Number(v || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function unique(values) {
+  return [...new Set(values.filter(v => String(v || '').trim() !== ''))].sort((a,b)=>String(a).localeCompare(String(b), 'pt-BR'));
+}
+function fillSelect(select, values, emptyLabel) {
+  const prev = select.value;
+  select.innerHTML = `<option value="">${emptyLabel}</option>` + values.map(v => `<option value="${String(v).replace(/"/g, '&quot;')}">${v}</option>`).join('');
+  if (values.includes(prev)) select.value = prev;
+}
+function dataset() {
+  return DATASETS[currentView] || [];
+}
+function aggregate(rows, key) {
+  const map = {};
+  rows.forEach(r => {
+    const value = String(r[key] || '').trim() || 'NÃO INFORMADO';
+    map[value] = (map[value] || 0) + 1;
+  });
+  return map;
+}
+function topKey(map) {
+  const entries = Object.entries(map).sort((a,b) => b[1] - a[1]);
+  return entries.length ? entries[0][0] : '-';
+}
+function statusPill(status) {
+  const s = String(status || '').toLowerCase();
+  let bg = '#edf2f7';
+  if (s.includes('final')) bg = '#e8f5ee';
+  else if (s.includes('cancel')) bg = '#fff1f1';
+  else if (s.includes('distrib')) bg = '#edf4ff';
+  else if (s.includes('homolog')) bg = '#eaf7ef';
+  else if (s.includes('andamento')) bg = '#fff7e6';
+  return `<span class="status-pill" style="background:${bg}">${status || '-'}</span>`;
+}
+function applyFilters() {
+  const empresa = el.empresaFilter.value;
+  const status = el.statusFilter.value;
+  const ano = el.anoFilter.value;
+  const q = el.searchFilter.value.trim().toLowerCase();
+
+  return dataset().filter(r => {
+    if (empresa && r.empresa !== empresa) return false;
+    if (status && r.status !== status) return false;
+    if (ano && r.ano !== ano) return false;
+    if (q) {
+      const blob = Object.values(r).join(' ').toLowerCase();
+      if (!blob.includes(q)) return false;
+    }
+    return true;
+  });
+}
+function refreshFilters() {
+  const rows = dataset();
+  fillSelect(el.empresaFilter, unique(rows.map(r => r.empresa)), 'Todas');
+  fillSelect(el.statusFilter, unique(rows.map(r => r.status)), 'Todos');
+  fillSelect(el.anoFilter, unique(rows.map(r => r.ano)), 'Todos');
+}
+function renderCards(rows) {
+  const count = rows.length;
+  const statusMap = aggregate(rows, 'status');
+  const empresaMap = aggregate(rows, 'empresa');
+  const anoMap = aggregate(rows, 'ano');
+  const valorSolicitado = rows.reduce((acc, r) => acc + (Number(r.valor_solicitado) || 0), 0);
+  const valorHomologado = rows.reduce((acc, r) => acc + (Number(r.valor_homologado) || 0), 0);
+
+  el.kpi1.textContent = formatNumber(count);
+  el.kpi2.textContent = formatNumber(Object.keys(statusMap).length);
+  el.kpi3.textContent = formatNumber(Object.keys(empresaMap).length);
+
+  el.quick1.textContent = topKey(statusMap);
+  el.quick2.textContent = topKey(empresaMap);
+  el.quick3.textContent = topKey(anoMap);
+
+  el.card2Title.textContent = 'STATUS DIFERENTES';
+  el.card2Sub.textContent = 'Quantidade de situações distintas';
+  el.card3Title.textContent = 'EMPRESAS';
+  el.card3Sub.textContent = 'Empresas únicas';
+  el.quick1Label.textContent = 'STATUS MAIS FREQUENTE';
+  el.quick2Label.textContent = 'TOP EMPRESA';
+  el.quick3Label.textContent = 'ANO MAIS RECORRENTE';
+
+  if (currentView === 'HOMOLOGAÇÕES EM ANDAMENTO') {
+    el.card1Title.textContent = 'HOMOLOGAÇÕES EM ANDAMENTO';
+    el.card1Sub.textContent = 'Quantidade total no recorte';
+    el.card4Title.textContent = 'VALOR HOMOLOGADO';
+    el.card4Sub.textContent = 'Somatório homologado do recorte';
+    el.kpi4.textContent = valorHomologado > 0 ? formatMoney(valorHomologado) : 'R$ 0,00';
+    el.quick3Label.textContent = 'VALOR SOLICITADO';
+    el.quick3.textContent = valorSolicitado > 0 ? formatMoney(valorSolicitado) : 'R$ 0,00';
+  } else if (currentView === 'CRÉDITOS HOMOLOGADOS') {
+    el.card1Title.textContent = 'TOTAL CERTIFICADOS';
+    el.card1Sub.textContent = 'Quantidade de certificados';
+    el.card4Title.textContent = 'VALOR HOMOLOGADO';
+    el.card4Sub.textContent = 'Somatório do valor dos certificados';
+    el.kpi4.textContent = valorHomologado > 0 ? formatMoney(valorHomologado) : 'R$ 0,00';
+  } else {
+    el.card1Title.textContent = 'TOTAL PROCESSOS';
+    el.card1Sub.textContent = 'Quantidade de solicitações pendentes';
+    el.card4Title.textContent = 'VALOR SOLICITADO';
+    el.card4Sub.textContent = 'Somatório do valor solicitado';
+    el.kpi4.textContent = valorSolicitado > 0 ? formatMoney(valorSolicitado) : 'R$ 0,00';
+  }
+}
+function renderChart(rows) {
+  const map = aggregate(rows, 'status');
+  const entries = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+  const max = entries.length ? entries[0][1] : 1;
+  el.barChart.innerHTML = entries.length ? entries.map(([label, value]) => `
+    <div class="bar-row">
+      <div class="bar-label" title="${label}">${label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(value/max)*100}%"></div></div>
+      <div class="bar-value">${formatNumber(value)}</div>
+    </div>
+  `).join('') : '<div class="empty">Nenhum dado para exibir.</div>';
+  el.chartTitle.textContent = 'DISTRIBUIÇÃO POR STATUS';
+  el.chartMeta.textContent = entries.length ? `Exibindo ${entries.length} categorias` : 'Sem dados';
+}
+function columnsForView() {
+  if (currentView === 'CRÉDITOS HOMOLOGADOS') {
+    return [
+      ['certificado', 'CERTIFICADO'],
+      ['empresa', 'EMPRESA'],
+      ['cnpj', 'CNPJ'],
+      ['ie', 'INSCRIÇÃO'],
+      ['data', 'DATA DO CERTIFICADO'],
+      ['processo', 'PROCESSO GERADOR'],
+      ['valor_homologado_fmt', 'VALOR'],
+      ['status', 'STATUS']
+    ];
+  }
+  if (currentView === 'HOMOLOGAÇÕES EM ANDAMENTO') {
+    return [
+      ['tipo', 'TIPO'],
+      ['processo', 'PROCESSO'],
+      ['empresa', 'EMPRESA'],
+      ['cnpj', 'CNPJ'],
+      ['ie', 'IE'],
+      ['data', 'DATA DO PROCESSO'],
+      ['valor_solicitado_fmt', 'VALOR SOLICITADO'],
+      ['valor_homologado_fmt', 'VALOR HOMOLOGADO'],
+      ['status', 'STATUS']
+    ];
+  }
+  return [
+    ['processo', 'PROCESSO'],
+    ['empresa', 'EMPRESA'],
+    ['cnpj', 'CNPJ/CPF'],
+    ['ie', 'INSCRIÇÃO ESTADUAL'],
+    ['data', 'DATA SOLICITAÇÃO'],
+    ['valor_solicitado_fmt', 'VALOR SOLICITADO'],
+    ['status', 'STATUS']
+  ];
+}
+function renderTable(rows) {
+  const cols = columnsForView();
+  if (!rows.length) {
+    el.tableWrap.innerHTML = '<div class="empty">Nenhum registro encontrado para os filtros aplicados.</div>';
+    el.tableCount.textContent = '0 linhas';
+    return;
+  }
+  const html = `
+    <table>
+      <thead>
+        <tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}</tr>
+      </thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr>
+            ${cols.map(c => {
+              const key = c[0];
+              if (key === 'status') return `<td>${statusPill(r[key])}</td>`;
+              if (key.includes('valor_')) return `<td class="money">${r[key] || '-'}</td>`;
+              return `<td>${r[key] || '-'}</td>`;
+            }).join('')}
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  el.tableWrap.innerHTML = html;
+  el.tableCount.textContent = `${formatNumber(rows.length)} linhas`;
+}
+function renderAll() {
+  el.pageTitle.textContent = currentView;
+  refreshFilters();
+  const rows = applyFilters();
+  el.baseBadge.textContent = `${formatNumber(dataset().length)} registros carregados`;
+  renderCards(rows);
+  renderChart(rows);
+  renderTable(rows);
+}
+document.querySelectorAll('.menu button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.menu button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentView = btn.dataset.view;
+    el.empresaFilter.value = '';
+    el.statusFilter.value = '';
+    el.anoFilter.value = '';
+    el.searchFilter.value = '';
+    renderAll();
+  });
+});
+[el.empresaFilter, el.statusFilter, el.anoFilter].forEach(node => node.addEventListener('change', renderAll));
+el.searchFilter.addEventListener('input', renderAll);
+document.querySelector('.menu button[data-view="PROCESSOS PENDENTES DE DISTRIBUIÇÃO / FINALIZAÇÃO"]').classList.add('active');
+renderAll();
+</script>
+</body>
+</html>
